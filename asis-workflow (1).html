@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>As-Is Process – Invoice Workflow</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --randstad-blue:   #1F3A8A;
+    --randstad-mid:    #2B52C8;
+    --randstad-accent: #00A4D3;
+    --randstad-gold:   #F5A623;
+    --randstad-red:    #E3001B;
+    --bg:              #F0F4FC;
+    --card-bg:         #FFFFFF;
+    --text-dark:       #0D1B4B;
+    --text-mid:        #3B4C82;
+    --text-light:      #7A8DB3;
+    --success:         #00B86E;
+    --shadow-sm: 0 2px 8px rgba(31,58,138,.10);
+    --shadow-md: 0 6px 24px rgba(31,58,138,.16);
+    --shadow-lg: 0 14px 40px rgba(31,58,138,.22);
+    --radius:    14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--bg);
+    color: var(--text-dark);
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  /* ── HEADER ───────────────────────────────────── */
+  header {
+    background: linear-gradient(135deg, var(--randstad-blue) 0%, var(--randstad-mid) 60%, var(--randstad-accent) 100%);
+    padding: 36px 48px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content:'';
+    position:absolute; inset:0;
+    background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .logo-mark {
+    width: 54px; height: 54px;
+    background: white;
+    border-radius: 12px;
+    display: grid; place-items: center;
+    box-shadow: var(--shadow-md);
+    flex-shrink: 0;
+  }
+  .logo-mark i { color: var(--randstad-blue); font-size: 26px; }
+  .header-text h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 2rem; font-weight: 800;
+    color: #fff; letter-spacing: .5px;
+    line-height: 1.1;
+  }
+  .header-text p {
+    color: rgba(255,255,255,.75);
+    font-size: .95rem; font-weight: 300;
+    margin-top: 4px;
+  }
+  .badge {
+    margin-left: auto;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 999px;
+    padding: 6px 18px;
+    font-size: .78rem; font-weight: 600;
+    color: #fff; letter-spacing: 1px;
+    text-transform: uppercase;
+    backdrop-filter: blur(4px);
+    white-space: nowrap;
+  }
+
+  /* ── MAIN CANVAS ──────────────────────────────── */
+  main {
+    max-width: 1240px;
+    margin: 40px auto 0;
+    padding: 0 24px;
+  }
+
+  /* ── LEGEND ───────────────────────────────────── */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 12px;
+    margin-bottom: 36px;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 8px;
+    background: white;
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: .8rem; font-weight: 600;
+    color: var(--text-mid);
+    box-shadow: var(--shadow-sm);
+  }
+  .legend-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+
+  /* ── FLOW WRAPPER ─────────────────────────────── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* ── STEP CARD ────────────────────────────────── */
+  .step {
+    width: 100%;
+    max-width: 780px;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    border: 1.5px solid transparent;
+    padding: 22px 26px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    position: relative;
+    transition: all .28s cubic-bezier(.4,0,.2,1);
+    cursor: default;
+  }
+  .step:hover {
+    transform: translateY(-4px) scale(1.012);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent-color, var(--randstad-mid));
+    z-index: 10;
+  }
+
+  /* coloured left stripe */
+  .step::before {
+    content:'';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 5px;
+    border-radius: var(--radius) 0 0 var(--radius);
+    background: var(--accent-color, var(--randstad-mid));
+  }
+
+  .step-icon {
+    width: 52px; height: 52px; flex-shrink: 0;
+    border-radius: 12px;
+    background: var(--icon-bg, #EEF2FF);
+    display: grid; place-items: center;
+    font-size: 22px;
+    color: var(--accent-color, var(--randstad-mid));
+    transition: transform .28s ease, background .28s ease;
+  }
+  .step:hover .step-icon {
+    transform: rotate(-8deg) scale(1.12);
+    background: var(--accent-color, var(--randstad-mid));
+    color: #fff;
+  }
+
+  .step-body { flex: 1; }
+  .step-num {
+    font-size: .68rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.4px;
+    color: var(--accent-color, var(--randstad-mid));
+    margin-bottom: 3px;
+  }
+  .step-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.18rem; font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1.2;
+  }
+  .step-desc {
+    font-size: .87rem; color: var(--text-mid);
+    margin-top: 5px; line-height: 1.6;
+  }
+  .step-note {
+    margin-top: 8px;
+    background: #FFF8E6;
+    border-left: 3px solid var(--randstad-gold);
+    border-radius: 0 8px 8px 0;
+    padding: 7px 12px;
+    font-size: .8rem; color: #6B4F00;
+    line-height: 1.5;
+  }
+  .step-note i { color: var(--randstad-gold); margin-right: 5px; }
+
+  /* ── CONNECTOR ────────────────────────────────── */
+  .connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 2px 0;
+  }
+  .connector-line {
+    width: 2px;
+    height: 28px;
+    background: linear-gradient(to bottom, var(--randstad-mid), var(--randstad-accent));
+    opacity: .45;
+  }
+  .connector-arrow {
+    width: 0; height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 10px solid var(--randstad-accent);
+    opacity: .7;
+  }
+
+  /* ── BILLING TYPE GRID ────────────────────────── */
+  .billing-wrapper {
+    width: 100%;
+    max-width: 1100px;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    border: 1.5px solid var(--randstad-accent);
+    padding: 28px 30px 30px;
+    position: relative;
+  }
+  .billing-wrapper::before {
+    content:'';
+    position: absolute; left:0; top:0; bottom:0; width: 5px;
+    border-radius: var(--radius) 0 0 var(--radius);
+    background: var(--randstad-accent);
+  }
+  .billing-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 20px;
+  }
+  .billing-icon {
+    width: 52px; height: 52px;
+    background: #E6F7FB;
+    border-radius: 12px;
+    display: grid; place-items: center;
+    font-size: 22px; color: var(--randstad-accent);
+    transition: transform .28s ease, background .28s ease;
+  }
+  .billing-wrapper:hover .billing-icon {
+    transform: rotate(-8deg) scale(1.12);
+    background: var(--randstad-accent); color: #fff;
+  }
+  .billing-header-text .step-num { color: var(--randstad-accent); }
+  .billing-header-text .step-title { font-size: 1.18rem; }
+  .billing-header-text .step-desc { font-size:.87rem; color:var(--text-mid); margin-top:3px; }
+
+  .billing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px,1fr));
+    gap: 10px;
+  }
+  .billing-pill {
+    background: linear-gradient(135deg, #EEF8FC 0%, #E2F0FB 100%);
+    border: 1px solid rgba(0,164,211,.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: .82rem; font-weight: 600;
+    color: var(--text-dark);
+    transition: all .22s ease;
+    cursor: default;
+  }
+  .billing-pill:hover {
+    background: linear-gradient(135deg, var(--randstad-accent) 0%, var(--randstad-mid) 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0,164,211,.35);
+  }
+  .billing-pill i {
+    font-size: 14px;
+    color: var(--randstad-accent);
+    transition: color .22s ease;
+    flex-shrink: 0;
+  }
+  .billing-pill:hover i { color: white; }
+
+  .billing-note {
+    margin-top: 14px;
+    background: #FFF3F4;
+    border-left: 3px solid var(--randstad-red);
+    border-radius: 0 8px 8px 0;
+    padding: 9px 14px;
+    font-size: .8rem; color: #7B0010; line-height: 1.6;
+  }
+  .billing-note i { color: var(--randstad-red); margin-right: 5px; }
+
+  /* ── SAP RESPONSE CARD ────────────────────────── */
+  .sap-card {
+    width: 100%; max-width: 780px;
+    background: linear-gradient(135deg, var(--randstad-blue) 0%, #162D6E 100%);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 24px 28px;
+    display: flex; align-items: flex-start; gap: 20px;
+    transition: all .28s ease;
+    cursor: default;
+  }
+  .sap-card:hover {
+    transform: translateY(-4px) scale(1.012);
+    box-shadow: 0 18px 50px rgba(31,58,138,.35);
+  }
+  .sap-icon {
+    width: 54px; height: 54px; flex-shrink: 0;
+    background: rgba(255,255,255,.12);
+    border-radius: 12px;
+    display: grid; place-items: center;
+    font-size: 24px; color: #fff;
+    transition: transform .28s ease, background .28s ease;
+  }
+  .sap-card:hover .sap-icon { transform: rotate(-8deg) scale(1.12); background: var(--randstad-accent); }
+  .sap-body {}
+  .sap-num { font-size:.68rem; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; color: var(--randstad-accent); margin-bottom:3px; }
+  .sap-title { font-family:'Barlow Condensed',sans-serif; font-size:1.18rem; font-weight:700; color:#fff; }
+  .sap-desc { font-size:.87rem; color:rgba(255,255,255,.7); margin-top:5px; line-height:1.6; }
+  .sap-tags { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  .sap-tag {
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: .78rem; font-weight: 600; color: #fff;
+    display: flex; align-items: center; gap: 7px;
+    transition: background .22s ease;
+  }
+  .sap-tag:hover { background: var(--randstad-accent); }
+  .sap-tag i { font-size:12px; color: var(--randstad-gold); }
+
+  /* ── WIDE CONNECTOR for billing ───────────────── */
+  .wide-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 2px 0;
+  }
+
+  /* step accent variants */
+  .step-source  { --accent-color:#00A4D3; --icon-bg:#E6F7FB; }
+  .step-spoc    { --accent-color:#1F3A8A; --icon-bg:#EEF2FF; }
+  .step-draft   { --accent-color:#F5A623; --icon-bg:#FFF8E6; }
+  .step-qc      { --accent-color:#00B86E; --icon-bg:#E6F9F1; }
+  .step-manager { --accent-color:#8B5CF6; --icon-bg:#F3EEFF; }
+  .step-sap     { --accent-color:#E3001B; --icon-bg:#FFEEF0; }
+
+  /* ── SECTION LABEL ────────────────────────────── */
+  .section-label {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:.72rem; font-weight:700; letter-spacing:2px;
+    text-transform:uppercase;
+    color: var(--text-light);
+    margin-bottom: 10px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .section-label::after {
+    content:''; flex:1; height:1px;
+    background: linear-gradient(to right,var(--text-light),transparent);
+    opacity:.3;
+  }
+
+  /* ── SOURCE CHANNELS ──────────────────────────── */
+  .source-channels {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .channel-chip {
+    background: linear-gradient(135deg,#E6F7FB,#EEF2FF);
+    border: 1px solid rgba(0,164,211,.25);
+    border-radius: 10px;
+    padding: 9px 16px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: .82rem; font-weight: 600; color: var(--text-dark);
+    transition: all .22s ease;
+    cursor: default;
+  }
+  .channel-chip:hover {
+    background: linear-gradient(135deg, var(--randstad-accent), var(--randstad-mid));
+    color: #fff; transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0,164,211,.3);
+  }
+  .channel-chip i { color: var(--randstad-accent); transition:color .22s ease; }
+  .channel-chip:hover i { color:#fff; }
+
+  /* ── FOOTER ───────────────────────────────────── */
+  footer {
+    max-width:1240px; margin: 48px auto 0; padding: 0 24px;
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  }
+  footer p { font-size:.78rem; color:var(--text-light); }
+  .footer-badge {
+    background: var(--randstad-blue);
+    color:#fff; font-size:.72rem; font-weight:700;
+    letter-spacing:.8px; text-transform:uppercase;
+    border-radius:999px; padding:5px 16px;
+  }
+
+  /* ── LEGEND CLICKABLE ─────────────────────────── */
+  .legend-item {
+    cursor: pointer;
+    user-select: none;
+    transition: all .22s ease;
+  }
+  .legend-item:hover {
+    background: var(--randstad-blue);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .legend-item:hover .legend-dot {
+    box-shadow: 0 0 0 3px rgba(255,255,255,.4);
+  }
+  .legend-item .legend-dot { transition: box-shadow .22s ease; }
+
+  /* ── SCROLL HIGHLIGHT FLASH ───────────────────── */
+  @keyframes highlightPulse {
+    0%   { box-shadow: var(--shadow-sm); }
+    30%  { box-shadow: 0 0 0 5px rgba(0,164,211,.35), var(--shadow-lg); transform: scale(1.015); }
+    70%  { box-shadow: 0 0 0 3px rgba(0,164,211,.2), var(--shadow-md); }
+    100% { box-shadow: var(--shadow-sm); transform: scale(1); }
+  }
+  .flash-highlight {
+    animation: highlightPulse 1s cubic-bezier(.4,0,.2,1) forwards;
+  }
+
+  @keyframes highlightPulseDark {
+    0%   { box-shadow: var(--shadow-lg); }
+    30%  { box-shadow: 0 0 0 6px rgba(0,164,211,.45), 0 18px 50px rgba(31,58,138,.5); transform: scale(1.018); }
+    70%  { box-shadow: 0 0 0 3px rgba(0,164,211,.2), var(--shadow-lg); }
+    100% { box-shadow: var(--shadow-lg); transform: scale(1); }
+  }
+  .flash-highlight-dark {
+    animation: highlightPulseDark 1s cubic-bezier(.4,0,.2,1) forwards;
+  }
+
+  /* ── SCROLL-TO TOOLTIP on legend ─────────────── */
+  .legend-item[data-target]::after {
+    content: '↓ Jump';
+    font-size: .65rem;
+    opacity: 0;
+    margin-left: 4px;
+    transition: opacity .2s ease;
+  }
+  .legend-item[data-target]:hover::after { opacity: .7; }
+
+  /* ── RESPONSIVE ───────────────────────────────── */
+  @media(max-width:640px){
+    header { padding: 24px 20px; flex-wrap:wrap; }
+    .badge { margin-left:0; }
+    main { padding:0 12px; }
+    .billing-grid { grid-template-columns:1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-mark"><i class="fa-solid fa-diagram-project"></i></div>
+  <div class="header-text">
+    <h1>Invoice Processing — As-Is Workflow</h1>
+    <p>Randstad · Billing &amp; Finance Operations · Current State Process Map</p>
+  </div>
+  <span class="badge"><i class="fa-solid fa-circle-dot" style="color:#6EF2B8;margin-right:6px"></i>As-Is Process</span>
+</header>
+
+<main>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item" data-target="step-source-el" title="Jump to Source &amp; Input"><span class="legend-dot" style="background:#00A4D3"></span>Source &amp; Input</div>
+    <div class="legend-item" data-target="step-spoc-el" title="Jump to SPOC Action"><span class="legend-dot" style="background:#1F3A8A"></span>SPOC Action</div>
+    <div class="legend-item" data-target="step-draft-el" title="Jump to Draft Preparation"><span class="legend-dot" style="background:#F5A623"></span>Draft Preparation</div>
+    <div class="legend-item" data-target="step-qc-el" title="Jump to QC Validation"><span class="legend-dot" style="background:#00B86E"></span>QC Validation</div>
+    <div class="legend-item" data-target="step-manager-el" title="Jump to Manager Approval"><span class="legend-dot" style="background:#8B5CF6"></span>Manager Approval</div>
+    <div class="legend-item" data-target="sap-push-el" title="Jump to SAP Integration"><span class="legend-dot" style="background:#1F3A8A"></span>SAP Integration</div>
+    <div class="legend-item" data-target="sap-response-el" title="Jump to System Response"><span class="legend-dot" style="background:#E3001B"></span>System Response</div>
+  </div>
+
+  <div class="flow">
+
+    <!-- ── STEP 1 ── SOURCE FILE RECEIPT -->
+    <div id="step-source-el" class="step step-source">
+      <div class="step-icon"><i class="fa-solid fa-inbox"></i></div>
+      <div class="step-body">
+        <div class="step-num">Step 01 · Trigger</div>
+        <div class="step-title">Source File Receipt</div>
+        <div class="step-desc">Billing source data is received by the SPOC team. Files arrive through multiple channels depending on the billing type.</div>
+        <div class="source-channels">
+          <div class="channel-chip"><i class="fa-solid fa-envelope"></i> Email from ELM Team</div>
+          <div class="channel-chip"><i class="fa-solid fa-briefcase"></i> Email from Business Team</div>
+          <div class="channel-chip"><i class="fa-solid fa-globe"></i> Client Portal (self-service)</div>
+        </div>
+        <div class="step-note"><i class="fa-solid fa-triangle-exclamation"></i><strong>Note:</strong> Source files may arrive from ELM, Business Team via email, or directly via the client portal for certain billing types. Channel may vary per transaction.</div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+    <!-- ── STEP 2 ── SPOC REVIEW -->
+    <div id="step-spoc-el" class="step step-spoc">
+      <div class="step-icon"><i class="fa-solid fa-user-tie"></i></div>
+      <div class="step-body">
+        <div class="step-num">Step 02 · SPOC Action</div>
+        <div class="step-title">Email &amp; Attachment Review by SPOC</div>
+        <div class="step-desc">The designated SPOC (Single Point of Contact) reviews the incoming email along with all attached documents to identify the billing context and determine the applicable billing type from the 13 available categories.</div>
+        <div class="step-note"><i class="fa-solid fa-circle-info"></i>SPOC assesses the email body, attached files, and any client references to classify the transaction correctly before proceeding.</div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+    <!-- ── STEP 3 ── BILLING TYPE DETERMINATION -->
+    <div class="billing-wrapper">
+      <div class="billing-header">
+        <div class="billing-icon"><i class="fa-solid fa-layer-group"></i></div>
+        <div class="billing-header-text">
+          <div class="step-num">Step 03 · Classification</div>
+          <div class="step-title">Billing Type Determination — 13 Types</div>
+          <div class="step-desc">SPOC identifies the applicable billing type. Each type follows a distinct template and processing path.</div>
+        </div>
+      </div>
+      <div class="billing-grid">
+        <div class="billing-pill"><i class="fa-solid fa-file-invoice-dollar"></i>PO Based Billing</div>
+        <div class="billing-pill"><i class="fa-solid fa-calculator"></i>Bill Rate Module</div>
+        <div class="billing-pill"><i class="fa-solid fa-money-bill-transfer"></i>Advance Liability</div>
+        <div class="billing-pill"><i class="fa-solid fa-object-group"></i>Consolidated &amp; IB Process</div>
+        <div class="billing-pill"><i class="fa-solid fa-receipt"></i>FCN With GST</div>
+        <div class="billing-pill"><i class="fa-solid fa-rotate-left"></i>EW Recovery</div>
+        <div class="billing-pill"><i class="fa-solid fa-boxes-stacked"></i>FG Billing</div>
+        <div class="billing-pill"><i class="fa-solid fa-building-columns"></i>GDC Billing</div>
+        <div class="billing-pill"><i class="fa-solid fa-network-wired"></i>Intercompany &amp; Other Entities</div>
+        <div class="billing-pill"><i class="fa-solid fa-handshake"></i>MSP Module</div>
+        <div class="billing-pill"><i class="fa-solid fa-coins"></i>Other Currency</div>
+        <div class="billing-pill"><i class="fa-solid fa-table-list"></i>Rate Card Billing</div>
+        <div class="billing-pill"><i class="fa-solid fa-clock-rotate-left"></i>Retainer Invoice Process</div>
+      </div>
+      <div class="billing-note"><i class="fa-solid fa-triangle-exclamation"></i><strong>Template Notice:</strong> The Invoice Draft Template structure differs based on the transaction/billing type. SPOC must select and populate the correct template variant specific to the identified billing type before proceeding to preparation.</div>
+    </div>
+
+    <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+    <!-- ── STEP 4 ── DRAFT PREPARATION -->
+    <div id="step-draft-el" class="step step-draft">
+      <div class="step-icon"><i class="fa-solid fa-file-pen"></i></div>
+      <div class="step-body">
+        <div class="step-num">Step 04 · Preparation</div>
+        <div class="step-title">Invoice Draft Sheet Preparation</div>
+        <div class="step-desc">The SPOC prepares the Invoice Draft Sheet using the billing-type-specific template. Line items, rates, quantities, tax fields, and entity details are populated from the source data.</div>
+        <div class="step-note"><i class="fa-solid fa-circle-info"></i>The same standard template format and structure is used across all billing types — however, the values within the fields are calculated and derived based on the specific transaction type being processed.</div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+    <!-- ── STEP 5 ── FIRST LEVEL QC -->
+    <div id="step-qc-el" class="step step-qc">
+      <div class="step-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+      <div class="step-body">
+        <div class="step-num">Step 05 · Quality Control</div>
+        <div class="step-title">First-Level QC Check (Validation)</div>
+        <div class="step-desc">The drafted invoice sheet undergoes a first-level QC review. The reviewer validates data accuracy, correct billing type template usage, calculations, tax compliance, and completeness before escalation.</div>
+        <div class="step-note"><i class="fa-solid fa-circle-check" style="color:#00B86E"></i>Checks include: arithmetic accuracy · tax codes · entity details · billing-type-specific fields · source data match · policy compliance.</div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+    <!-- ── STEP 6 ── MANAGER APPROVAL -->
+    <div id="step-manager-el" class="step step-manager">
+      <div class="step-icon"><i class="fa-solid fa-user-shield"></i></div>
+      <div class="step-body">
+        <div class="step-num">Step 06 · Approval</div>
+        <div class="step-title">Manager Approval</div>
+        <div class="step-desc">The QC-validated draft sheet is shared with the Manager for final review and approval. The Manager authenticates the invoice details, authorises processing, and confirms readiness for SAP submission.</div>
+        <div class="step-note"><i class="fa-solid fa-circle-info"></i>Manager sign-off is mandatory before any SAP data push. Rejected drafts are returned to the SPOC for correction.</div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+    <!-- ── STEP 7 ── SAP PUSH -->
+    <div id="sap-push-el" class="step step-sap">
+      <div class="step-icon"><i class="fa-solid fa-upload"></i></div>
+      <div class="step-body">
+        <div class="step-num">Step 07 · SAP Entry</div>
+        <div class="step-title">File Push to SAP</div>
+        <div class="step-desc">Upon manager approval, the invoice data is entered / pushed into the SAP system by the SPOC. The transaction is posted against the relevant cost centre, entity, and billing configuration.</div>
+        <div class="step-note"><i class="fa-solid fa-server"></i>SAP module used depends on billing type. Data is entered manually or via batch upload based on volume.</div>
+      </div>
+    </div>
+
+    <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+    <!-- ── STEP 8 ── SAP RESPONSE -->
+    <div id="sap-response-el" class="sap-card">
+      <div class="sap-icon"><i class="fa-solid fa-server"></i></div>
+      <div class="sap-body">
+        <div class="sap-num">Step 08 · System Output</div>
+        <div class="sap-title">SAP System Response — Process Complete</div>
+        <div class="sap-desc">SAP processes the posted transaction and returns the confirmation response. The workflow is considered complete upon successful receipt of both identifiers.</div>
+        <div class="sap-tags">
+          <div class="sap-tag"><i class="fa-solid fa-hashtag"></i>SO Number Generated</div>
+          <div class="sap-tag"><i class="fa-solid fa-file-invoice"></i>Invoice Number Generated</div>
+          <div class="sap-tag"><i class="fa-solid fa-circle-check"></i>Process Complete</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /flow -->
+</main>
+
+<footer>
+  <p>Randstad · Billing &amp; Finance Ops · As-Is Process Documentation · Confidential</p>
+  <span class="footer-badge">Draft · Internal Use Only</span>
+</footer>
+
+<!-- ── BACK TO TOP BUTTON ──────────────────────── -->
+<button id="back-to-top" aria-label="Back to top" title="Back to top">
+  <svg class="progress-ring" viewBox="0 0 48 48" aria-hidden="true">
+    <circle cx="24" cy="24" r="21.3"/>
+  </svg>
+  <i class="fa-solid fa-chevron-up"></i>
+</button>
+
+<style>
+  #back-to-top {
+    position: fixed;
+    bottom: 36px;
+    right: 36px;
+    z-index: 999;
+
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+
+    background: linear-gradient(135deg, var(--randstad-blue) 0%, var(--randstad-mid) 100%);
+    color: #fff;
+    font-size: 18px;
+
+    display: grid;
+    place-items: center;
+
+    box-shadow: 0 4px 18px rgba(31,58,138,.35);
+
+    /* hidden by default */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(14px) scale(0.88);
+
+    transition:
+      opacity .3s cubic-bezier(.4,0,.2,1),
+      visibility .3s cubic-bezier(.4,0,.2,1),
+      transform .3s cubic-bezier(.4,0,.2,1),
+      background .22s ease,
+      box-shadow .22s ease;
+  }
+
+  /* visible state */
+  #back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+  }
+
+  /* hover & focus */
+  #back-to-top:hover,
+  #back-to-top:focus-visible {
+    background: linear-gradient(135deg, var(--randstad-accent) 0%, var(--randstad-mid) 100%);
+    box-shadow: 0 6px 24px rgba(0,164,211,.45);
+    transform: translateY(-3px) scale(1.07);
+    outline: none;
+  }
+
+  /* active / pressed */
+  #back-to-top:active {
+    transform: translateY(0) scale(0.96);
+    box-shadow: 0 2px 10px rgba(31,58,138,.25);
+  }
+
+  /* icon nudge on hover */
+  #back-to-top:hover i {
+    animation: nudgeUp .45s ease forwards;
+  }
+
+  @keyframes nudgeUp {
+    0%   { transform: translateY(0); }
+    40%  { transform: translateY(-4px); }
+    70%  { transform: translateY(-2px); }
+    100% { transform: translateY(0); }
+  }
+
+  /* progress ring */
+  #back-to-top svg.progress-ring {
+    position: absolute;
+    top: 0; left: 0;
+    width: 48px; height: 48px;
+    transform: rotate(-90deg);
+    pointer-events: none;
+  }
+  #back-to-top svg.progress-ring circle {
+    fill: none;
+    stroke: rgba(255,255,255,.28);
+    stroke-width: 3;
+    stroke-dasharray: 134;
+    stroke-dashoffset: 134;
+    stroke-linecap: round;
+    transition: stroke-dashoffset .12s linear;
+  }
+
+  @media(max-width:640px){
+    #back-to-top { bottom: 20px; right: 20px; width: 42px; height: 42px; font-size: 16px; }
+  }
+</style>
+
+</body>
+
+<script>
+  document.querySelectorAll('.legend-item[data-target]').forEach(function(item) {
+    item.addEventListener('click', function() {
+      var targetId = item.getAttribute('data-target');
+      var target = document.getElementById(targetId);
+      if (!target) return;
+
+      // Smooth scroll with offset so header doesn't obscure
+      var offset = 80;
+      var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+      window.scrollTo({ top: top, behavior: 'smooth' });
+
+      // After scroll settles, flash highlight
+      setTimeout(function() {
+        var isDark = target.classList.contains('sap-card');
+        var cls = isDark ? 'flash-highlight-dark' : 'flash-highlight';
+        target.classList.remove('flash-highlight', 'flash-highlight-dark');
+        void target.offsetWidth; // force reflow so animation restarts
+        target.classList.add(cls);
+        target.addEventListener('animationend', function() {
+          target.classList.remove('flash-highlight', 'flash-highlight-dark');
+        }, { once: true });
+      }, 500);
+    });
+  });
+</script>
+
+<script>
+  (function () {
+    var btn        = document.getElementById('back-to-top');
+    var ring       = btn.querySelector('circle');
+    var THRESHOLD  = 300;   // px scrolled before button appears
+    var CIRCUMFERENCE = 134; // 2 * π * r  (r = 21.3)
+
+    /* ── Scroll spy ─────────────────────────── */
+    function onScroll() {
+      var scrolled  = window.pageYOffset || document.documentElement.scrollTop;
+      var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+
+      // Show / hide
+      if (scrolled > THRESHOLD) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
+
+      // Progress ring fill
+      if (ring && docHeight > 0) {
+        var pct    = Math.min(scrolled / docHeight, 1);
+        var offset = CIRCUMFERENCE - pct * CIRCUMFERENCE;
+        ring.style.strokeDashoffset = offset;
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // run once on load
+
+    /* ── Click → scroll to top ──────────────── */
+    btn.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    /* ── Keyboard accessibility ─────────────── */
+    btn.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  })();
+</script>
+</html>

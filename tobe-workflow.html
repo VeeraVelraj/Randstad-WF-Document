@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-Be Process – Intelligent Invoice Workflow</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════ */
+:root {
+  /* Randstad */
+  --rd-blue:    #1F3A8A;
+  --rd-mid:     #2B52C8;
+  --rd-accent:  #00A4D3;
+  --rd-light:   #E8F4FB;
+
+  /* Zvolv */
+  --zv-orange:  #06CC9D;
+  --zv-dark:    #1A1A2E;
+  --zv-teal:    #00B4D8;
+  --zv-amber:   #FFC107;
+  --zv-light:   #E8FBF6;
+
+  /* Shared */
+  --success:    #00B86E;
+  --warning:    #F5A623;
+  --danger:     #E3001B;
+  --bg:         #F2F5FC;
+  --white:      #FFFFFF;
+  --text-dark:  #0D1B4B;
+  --text-mid:   #4A5580;
+  --text-light: #8A96BB;
+
+  --radius-sm:  8px;
+  --radius:     14px;
+  --radius-lg:  20px;
+
+  --shadow-sm:  0 2px 8px rgba(31,58,138,.09);
+  --shadow-md:  0 6px 22px rgba(31,58,138,.14);
+  --shadow-lg:  0 14px 40px rgba(31,58,138,.2);
+  --shadow-zv:  0 6px 22px rgba(6,204,157,.18);
+}
+
+* { box-sizing:border-box; margin:0; padding:0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--bg);
+  color: var(--text-dark);
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+/* ═══════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════ */
+header {
+  background: linear-gradient(135deg, var(--rd-blue) 0%, #162D74 40%, var(--zv-dark) 100%);
+  padding: 32px 48px 28px;
+  display: flex; align-items: center; gap: 20px;
+  position: relative; overflow: hidden;
+}
+header::before {
+  content:'';
+  position:absolute; inset:0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.header-logos { display:flex; gap:10px; align-items:center; }
+.logo-pill {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .78rem; font-weight: 800;
+  letter-spacing: 1.2px; text-transform: uppercase;
+}
+.logo-pill.rd { background: var(--rd-accent); color: #fff; }
+.logo-pill.zv { background: var(--zv-orange); color: #fff; }
+.logo-sep { color: rgba(255,255,255,.3); font-size: 1.2rem; }
+.header-text { flex:1; }
+.header-text h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.85rem; font-weight: 900;
+  color: #fff; letter-spacing: .4px; line-height: 1.1;
+}
+.header-text p { color: rgba(255,255,255,.65); font-size:.9rem; margin-top:4px; }
+.header-badge {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 999px; padding: 6px 18px;
+  font-size: .75rem; font-weight: 700; color: #fff;
+  letter-spacing: 1px; text-transform: uppercase;
+  backdrop-filter: blur(6px); white-space: nowrap;
+}
+.header-badge i { color: #6EF2B8; margin-right:6px; }
+
+/* ═══════════════════════════════════════════════
+   LEGEND
+═══════════════════════════════════════════════ */
+.legend-bar {
+  max-width: 1200px; margin: 28px auto 0; padding: 0 24px;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+}
+.legend-label {
+  font-size: .7rem; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text-light);
+  margin-right: 4px;
+}
+.leg {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--white); border-radius: 999px;
+  padding: 5px 14px; font-size: .78rem; font-weight: 600;
+  color: var(--text-mid); box-shadow: var(--shadow-sm);
+  cursor: pointer; user-select: none;
+  transition: all .22s ease;
+  border: 1.5px solid transparent;
+}
+.leg:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.leg.rd-leg:hover  { background: var(--rd-blue);   color:#fff; border-color: var(--rd-blue); }
+.leg.zv-leg:hover  { background: var(--zv-orange); color:#fff; border-color: var(--zv-orange); }
+.leg.ex-leg:hover  { background: var(--danger);    color:#fff; border-color: var(--danger); }
+.leg.mas-leg:hover { background: var(--success);   color:#fff; border-color: var(--success); }
+.leg-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+
+/* ═══════════════════════════════════════════════
+   MAIN CANVAS
+═══════════════════════════════════════════════ */
+main {
+  max-width: 1200px; margin: 28px auto 0; padding: 0 24px;
+}
+
+/* ═══════════════════════════════════════════════
+   SECTION DIVIDER
+═══════════════════════════════════════════════ */
+.section-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 36px 0 20px;
+}
+.section-divider span {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .72rem; font-weight: 800; letter-spacing: 2px;
+  text-transform: uppercase; white-space: nowrap;
+  padding: 4px 14px; border-radius: 999px;
+}
+.section-divider .line { flex:1; height:1px; }
+.sd-rd span  { background: var(--rd-blue);   color:#fff; }
+.sd-rd .line { background: linear-gradient(to right, var(--rd-blue), transparent); }
+.sd-zv span  { background: var(--zv-orange); color:#fff; }
+.sd-zv .line { background: linear-gradient(to right, var(--zv-orange), transparent); }
+.sd-ex span  { background: var(--danger);    color:#fff; }
+.sd-ex .line { background: linear-gradient(to right, var(--danger), transparent); }
+.sd-mas span { background: var(--success);   color:#fff; }
+.sd-mas .line { background: linear-gradient(to right, var(--success), transparent); }
+
+/* ═══════════════════════════════════════════════
+   FLOW COLUMN
+═══════════════════════════════════════════════ */
+.flow { display:flex; flex-direction:column; align-items:center; gap:0; }
+
+/* ═══════════════════════════════════════════════
+   BASE CARD
+═══════════════════════════════════════════════ */
+.card {
+  width: 100%; max-width: 820px;
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  display: flex; align-items: flex-start; gap: 18px;
+  position: relative;
+  transition: all .28s cubic-bezier(.4,0,.2,1);
+  cursor: default;
+  border: 1.5px solid transparent;
+}
+.card::before {
+  content:'';
+  position:absolute; left:0; top:0; bottom:0; width:5px;
+  border-radius: var(--radius) 0 0 var(--radius);
+  background: var(--stripe, var(--rd-mid));
+}
+.card:hover {
+  transform: translateY(-4px) scale(1.011);
+  box-shadow: var(--shadow-lg) !important;
+  border-color: var(--stripe, var(--rd-mid));
+  z-index: 10;
+}
+
+/* ── Randstad card ── */
+.card-rd {
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+  --stripe: var(--rd-blue);
+}
+/* ── Zvolv card ── */
+.card-zv {
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+  --stripe: var(--zv-orange);
+}
+/* ── Exception card ── */
+.card-ex {
+  background: #FFF5F5;
+  box-shadow: var(--shadow-sm);
+  --stripe: var(--danger);
+}
+
+/* ── ICON ── */
+.cicon {
+  width:50px; height:50px; flex-shrink:0;
+  border-radius: 12px;
+  display:grid; place-items:center;
+  font-size:20px;
+  transition: transform .28s ease, background .28s ease, color .28s ease;
+}
+.card-rd .cicon { background: #EEF2FF; color: var(--rd-blue); }
+.card-zv .cicon { background: var(--zv-light); color: var(--zv-orange); }
+.card-ex .cicon { background: #FFE8E8; color: var(--danger); }
+
+.card:hover .cicon { transform: rotate(-8deg) scale(1.12); }
+.card-rd:hover .cicon { background: var(--rd-blue);   color:#fff; }
+.card-zv:hover .cicon { background: var(--zv-orange); color:#fff; }
+.card-ex:hover .cicon { background: var(--danger);    color:#fff; }
+
+/* ── BODY ── */
+.cbody { flex:1; }
+.cnum {
+  font-size:.67rem; font-weight:700; letter-spacing:1.5px;
+  text-transform:uppercase; margin-bottom:2px;
+}
+.card-rd .cnum { color: var(--rd-mid); }
+.card-zv .cnum { color: var(--zv-orange); }
+.card-ex .cnum { color: var(--danger); }
+
+.ctitle {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size:1.12rem; font-weight:700; color:var(--text-dark); line-height:1.2;
+}
+.cdesc { font-size:.85rem; color:var(--text-mid); margin-top:4px; line-height:1.6; }
+
+/* ── NOTE ── */
+.cnote {
+  margin-top:9px;
+  border-radius: 0 8px 8px 0;
+  padding: 7px 12px;
+  font-size:.79rem; line-height:1.55;
+}
+.cnote-blue  { background:#EEF5FF; border-left:3px solid var(--rd-accent); color:#1A3070; }
+.cnote-zv    { background:var(--zv-light); border-left:3px solid var(--zv-orange); color:#024D3C; }
+.cnote-warn  { background:#FFF8E6; border-left:3px solid var(--warning); color:#6B4F00; }
+.cnote-red   { background:#FFF0F0; border-left:3px solid var(--danger); color:#7B0010; }
+.cnote-green { background:#E8FAF3; border-left:3px solid var(--success); color:#004D2C; }
+
+/* ── OWNER BADGE ── */
+.owner-badge {
+  margin-left: auto; flex-shrink:0; align-self:flex-start;
+  font-size:.68rem; font-weight:700; letter-spacing:.8px;
+  text-transform:uppercase; padding:4px 12px;
+  border-radius:999px; white-space:nowrap;
+}
+.ob-rd { background:var(--rd-light); color:var(--rd-blue); border:1px solid rgba(31,58,138,.2); }
+.ob-zv { background:var(--zv-light); color:var(--zv-orange); border:1px solid rgba(6,204,157,.25); }
+
+/* ═══════════════════════════════════════════════
+   CONNECTOR
+═══════════════════════════════════════════════ */
+.connector {
+  display:flex; flex-direction:column; align-items:center; gap:0; padding:1px 0;
+}
+.conn-line { width:2px; height:26px; opacity:.4; }
+.conn-line-rd { background:linear-gradient(to bottom, var(--rd-mid), var(--rd-accent)); }
+.conn-line-zv { background:linear-gradient(to bottom, var(--zv-orange), var(--zv-teal)); }
+.conn-line-mix{ background:linear-gradient(to bottom, var(--rd-accent), var(--zv-orange)); }
+.conn-arrow { width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; opacity:.65; }
+.conn-arrow-rd  { border-top:9px solid var(--rd-accent); }
+.conn-arrow-zv  { border-top:9px solid var(--zv-orange); }
+.conn-arrow-mix { border-top:9px solid var(--zv-orange); }
+
+/* ── HANDOFF PILL ── */
+.handoff {
+  display:flex; align-items:center; gap:8px;
+  padding: 5px 18px; border-radius:999px;
+  font-size:.72rem; font-weight:700; letter-spacing:.8px;
+  text-transform:uppercase; margin:4px 0;
+  box-shadow: var(--shadow-sm);
+}
+.handoff-rd  { background:var(--rd-light); color:var(--rd-blue); border:1px solid rgba(31,58,138,.2); }
+.handoff-zv  { background:var(--zv-light); color:var(--zv-orange); border:1px solid rgba(6,204,157,.2); }
+.handoff-mix {
+  background:linear-gradient(135deg, var(--rd-light), var(--zv-light));
+  color:var(--text-mid); border:1px solid rgba(0,0,0,.08);
+}
+
+/* ═══════════════════════════════════════════════
+   EXCEPTION BLOCK
+═══════════════════════════════════════════════ */
+.exception-block {
+  width:100%; max-width:820px;
+  background:#FFF5F5;
+  border:1.5px solid rgba(227,0,27,.2);
+  border-radius: var(--radius);
+  padding:20px 24px;
+  box-shadow: var(--shadow-sm);
+  transition: all .28s ease;
+}
+.exception-block:hover { box-shadow: 0 10px 32px rgba(227,0,27,.15); transform:translateY(-3px); }
+.exception-header {
+  display:flex; align-items:center; gap:14px; margin-bottom:16px;
+}
+.exception-icon {
+  width:48px; height:48px; border-radius:12px;
+  background:#FFE8E8; display:grid; place-items:center;
+  font-size:20px; color:var(--danger); flex-shrink:0;
+  transition: transform .28s ease, background .28s ease;
+}
+.exception-block:hover .exception-icon { transform:rotate(-8deg) scale(1.1); background:var(--danger); color:#fff; }
+.exception-title {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:1.1rem; font-weight:700; color:var(--text-dark);
+}
+.exception-sub { font-size:.82rem; color:var(--text-mid); margin-top:2px; }
+.exception-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; }
+.ex-item {
+  background:var(--white); border:1px solid rgba(227,0,27,.15);
+  border-radius:10px; padding:12px 14px;
+  display:flex; gap:10px; align-items:flex-start;
+  transition: all .22s ease;
+}
+.ex-item:hover { border-color:var(--danger); transform:translateY(-2px); box-shadow:0 4px 14px rgba(227,0,27,.12); }
+.ex-num {
+  width:24px; height:24px; border-radius:50%;
+  background:var(--danger); color:#fff;
+  font-size:.7rem; font-weight:800;
+  display:grid; place-items:center; flex-shrink:0; margin-top:1px;
+}
+.ex-text { font-size:.81rem; color:var(--text-mid); line-height:1.55; }
+.ex-text strong { color:var(--text-dark); display:block; margin-bottom:2px; }
+
+/* ═══════════════════════════════════════════════
+   MASTERS GRID
+═══════════════════════════════════════════════ */
+.masters-grid {
+  width:100%; max-width:820px;
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:14px;
+}
+.master-card {
+  background:var(--white); border-radius:var(--radius);
+  padding:18px 20px; box-shadow:var(--shadow-sm);
+  border:1.5px solid transparent;
+  transition: all .28s ease; cursor:default;
+  position:relative; overflow:hidden;
+}
+.master-card::after {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:3px;
+  background: var(--mc-color, var(--success));
+}
+.master-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-md); border-color:var(--mc-color, var(--success)); }
+.mc-icon {
+  width:40px; height:40px; border-radius:10px;
+  background: color-mix(in srgb, var(--mc-color, var(--success)) 12%, white);
+  display:grid; place-items:center; font-size:17px;
+  color: var(--mc-color, var(--success)); margin-bottom:10px;
+  transition: transform .28s ease, background .28s ease;
+}
+.master-card:hover .mc-icon { transform:scale(1.1) rotate(-6deg); background:var(--mc-color, var(--success)); color:#fff; }
+.mc-title { font-family:'Barlow Condensed',sans-serif; font-size:1rem; font-weight:700; color:var(--text-dark); }
+.mc-desc  { font-size:.78rem; color:var(--text-mid); margin-top:4px; line-height:1.55; }
+.mc-tags  { display:flex; flex-wrap:wrap; gap:5px; margin-top:10px; }
+.mc-tag {
+  background: color-mix(in srgb, var(--mc-color, var(--success)) 10%, white);
+  color: var(--mc-color, var(--success)); border:1px solid color-mix(in srgb, var(--mc-color, var(--success)) 25%, transparent);
+  border-radius:6px; padding:2px 8px; font-size:.7rem; font-weight:600;
+}
+.mc-request {
+  margin-top:10px; background:#FFF8E6; border-left:3px solid var(--warning);
+  border-radius:0 6px 6px 0; padding:6px 10px;
+  font-size:.75rem; color:#6B4F00;
+}
+
+/* ═══════════════════════════════════════════════
+   SAP DARK CARD
+═══════════════════════════════════════════════ */
+.sap-dark {
+  width:100%; max-width:820px;
+  background: linear-gradient(135deg, var(--rd-blue) 0%, #162D74 100%);
+  border-radius:var(--radius); padding:22px 26px;
+  display:flex; align-items:flex-start; gap:18px;
+  box-shadow:var(--shadow-lg);
+  transition:all .28s ease; cursor:default;
+}
+.sap-dark:hover { transform:translateY(-4px) scale(1.011); box-shadow:0 18px 50px rgba(31,58,138,.35); }
+.sap-dark-icon {
+  width:50px; height:50px; border-radius:12px;
+  background:rgba(255,255,255,.12); display:grid; place-items:center;
+  font-size:21px; color:#fff; flex-shrink:0;
+  transition:transform .28s ease, background .28s ease;
+}
+.sap-dark:hover .sap-dark-icon { transform:rotate(-8deg) scale(1.12); background:var(--rd-accent); }
+.sap-dark-body {}
+.sap-dark-num { font-size:.67rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--rd-accent); margin-bottom:2px; }
+.sap-dark-title { font-family:'Barlow Condensed',sans-serif; font-size:1.12rem; font-weight:700; color:#fff; }
+.sap-dark-desc  { font-size:.85rem; color:rgba(255,255,255,.65); margin-top:4px; line-height:1.6; }
+.sap-tags { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+.sap-tag {
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.22);
+  border-radius:999px; padding:4px 14px;
+  font-size:.75rem; font-weight:600; color:#fff;
+  display:flex; align-items:center; gap:6px;
+  transition:background .2s ease;
+}
+.sap-tag:hover { background:var(--rd-accent); }
+.sap-tag i { color:var(--zv-amber); font-size:11px; }
+
+/* ═══════════════════════════════════════════════
+   CHIPS ROW
+═══════════════════════════════════════════════ */
+.chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.chip {
+  display:flex; align-items:center; gap:7px;
+  border-radius:10px; padding:7px 14px;
+  font-size:.79rem; font-weight:600;
+  transition:all .22s ease; cursor:default;
+}
+.chip:hover { transform:translateY(-2px); box-shadow:var(--shadow-sm); }
+.chip-rd { background:var(--rd-light); color:var(--rd-blue); border:1px solid rgba(31,58,138,.18); }
+.chip-rd:hover { background:var(--rd-blue); color:#fff; }
+.chip-rd i { color:var(--rd-accent); transition:color .22s ease; }
+.chip-rd:hover i { color:#fff; }
+.chip-zv { background:var(--zv-light); color:var(--zv-orange); border:1px solid rgba(6,204,157,.2); }
+.chip-zv:hover { background:var(--zv-orange); color:#fff; }
+.chip-zv i { color:var(--zv-orange); transition:color .22s ease; }
+.chip-zv:hover i { color:#fff; }
+
+/* ═══════════════════════════════════════════════
+   HIGHLIGHT ANIMATIONS
+═══════════════════════════════════════════════ */
+@keyframes hlPulse {
+  0%   { box-shadow: var(--shadow-sm); }
+  30%  { box-shadow: 0 0 0 5px rgba(0,164,211,.3), var(--shadow-lg); transform:scale(1.013); }
+  70%  { box-shadow: 0 0 0 2px rgba(0,164,211,.15), var(--shadow-md); }
+  100% { box-shadow: var(--shadow-sm); transform:scale(1); }
+}
+@keyframes hlPulseZv {
+  0%   { box-shadow: var(--shadow-sm); }
+  30%  { box-shadow: 0 0 0 5px rgba(6,204,157,.3), var(--shadow-zv); transform:scale(1.013); }
+  70%  { box-shadow: 0 0 0 2px rgba(6,204,157,.15), var(--shadow-md); }
+  100% { box-shadow: var(--shadow-sm); transform:scale(1); }
+}
+@keyframes hlPulseDark {
+  0%   { box-shadow: var(--shadow-lg); }
+  30%  { box-shadow: 0 0 0 6px rgba(0,164,211,.4), 0 18px 50px rgba(31,58,138,.45); transform:scale(1.015); }
+  70%  { box-shadow: 0 0 0 3px rgba(0,164,211,.18), var(--shadow-lg); }
+  100% { box-shadow: var(--shadow-lg); transform:scale(1); }
+}
+.hl-rd   { animation: hlPulse   1s cubic-bezier(.4,0,.2,1) forwards; }
+.hl-zv   { animation: hlPulseZv 1s cubic-bezier(.4,0,.2,1) forwards; }
+.hl-dark { animation: hlPulseDark 1s cubic-bezier(.4,0,.2,1) forwards; }
+
+/* ═══════════════════════════════════════════════
+   BACK TO TOP
+═══════════════════════════════════════════════ */
+#back-to-top {
+  position:fixed; bottom:36px; right:36px; z-index:999;
+  width:48px; height:48px; border-radius:50%;
+  border:none; cursor:pointer;
+  background:linear-gradient(135deg, var(--rd-blue), var(--rd-mid));
+  color:#fff; font-size:18px;
+  display:grid; place-items:center;
+  box-shadow:0 4px 18px rgba(31,58,138,.35);
+  opacity:0; visibility:hidden;
+  transform:translateY(14px) scale(.88);
+  transition: opacity .3s ease, visibility .3s ease, transform .3s ease, background .22s ease, box-shadow .22s ease;
+}
+#back-to-top.visible { opacity:1; visibility:visible; transform:translateY(0) scale(1); }
+#back-to-top:hover { background:linear-gradient(135deg,var(--zv-orange),var(--rd-mid)); box-shadow:0 6px 24px rgba(6,204,157,.4); transform:translateY(-3px) scale(1.07); }
+#back-to-top:active { transform:translateY(0) scale(.95); }
+#back-to-top:hover i { animation:nudge .45s ease forwards; }
+@keyframes nudge { 0%{transform:translateY(0)} 40%{transform:translateY(-4px)} 70%{transform:translateY(-2px)} 100%{transform:translateY(0)} }
+#back-to-top svg.ring { position:absolute;top:0;left:0;width:48px;height:48px;transform:rotate(-90deg);pointer-events:none; }
+#back-to-top svg.ring circle { fill:none;stroke:rgba(255,255,255,.28);stroke-width:3;stroke-dasharray:134;stroke-dashoffset:134;stroke-linecap:round;transition:stroke-dashoffset .1s linear; }
+
+/* ═══════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════ */
+footer {
+  max-width:1200px; margin:48px auto 0; padding:0 24px;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+}
+footer p { font-size:.76rem; color:var(--text-light); }
+.footer-badge { background:var(--rd-blue); color:#fff; font-size:.7rem; font-weight:700; letter-spacing:.8px; text-transform:uppercase; border-radius:999px; padding:5px 16px; }
+
+/* ═══════════════════════════════════════════════
+   LEGEND TOOLTIP HINT
+═══════════════════════════════════════════════ */
+.leg[data-target]::after { content:'↓'; font-size:.65rem; opacity:0; margin-left:3px; transition:opacity .2s; }
+.leg[data-target]:hover::after { opacity:.6; }
+
+@media(max-width:640px){
+  header { padding:22px 16px; flex-wrap:wrap; }
+  main, .legend-bar, footer { padding:0 12px; }
+  .masters-grid { grid-template-columns:1fr; }
+  .exception-grid { grid-template-columns:1fr; }
+  #back-to-top { bottom:20px; right:20px; width:42px; height:42px; font-size:16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════════ -->
+<header>
+  <div class="header-logos">
+    <span class="logo-pill rd">Randstad</span>
+    <span class="logo-sep">×</span>
+    <span class="logo-pill zv">Zvolv</span>
+  </div>
+  <div class="header-text">
+    <h1>Intelligent Invoice Processing — To-Be Workflow</h1>
+    <p>Zai-Powered Automation · Zvolv Platform · Billing &amp; Finance Operations · Future State</p>
+  </div>
+  <span class="header-badge"><i class="fa-solid fa-circle-dot"></i>To-Be Process</span>
+</header>
+
+<!-- ═══ LEGEND ════════════════════════════════════ -->
+<div class="legend-bar">
+  <span class="legend-label">Jump to:</span>
+  <div class="leg rd-leg"  data-target="s1"  title="Source Input"><span class="leg-dot" style="background:#00A4D3"></span>Source Input</div>
+  <div class="leg zv-leg"  data-target="s2"  title="Zai Processing"><span class="leg-dot" style="background:#06CC9D"></span>Zai Processing</div>
+  <div class="leg zv-leg"  data-target="s4"  title="Rule Engine"><span class="leg-dot" style="background:#06CC9D"></span>Rule Engine</div>
+  <div class="leg zv-leg"  data-target="s6"  title="Template Generation"><span class="leg-dot" style="background:#00B4D8"></span>Template Generation</div>
+  <div class="leg rd-leg"  data-target="s7"  title="SPOC Review"><span class="leg-dot" style="background:#1F3A8A"></span>SPOC Review</div>
+  <div class="leg rd-leg"  data-target="s8"  title="Manager Approval"><span class="leg-dot" style="background:#2B52C8"></span>Manager Approval</div>
+  <div class="leg zv-leg"  data-target="s9"  title="SAP API Push"><span class="leg-dot" style="background:#06CC9D"></span>SAP API Push</div>
+  <div class="leg zv-leg"  data-target="s10" title="SO Master Update"><span class="leg-dot" style="background:#00B4D8"></span>SO Master Update</div>
+  <div class="leg ex-leg"  data-target="exc" title="Exceptions"><span class="leg-dot" style="background:#E3001B"></span>Exceptions</div>
+  <div class="leg mas-leg" data-target="mas" title="Masters"><span class="leg-dot" style="background:#00B86E"></span>Masters &amp; Config</div>
+</div>
+
+<!-- ═══ MAIN ══════════════════════════════════════ -->
+<main>
+<div class="flow">
+
+<!-- ─── STEP 1 ─ SOURCE INPUT ─────────────────── -->
+<div class="section-divider sd-rd"><span><i class="fa-solid fa-arrow-right-to-bracket" style="margin-right:6px"></i>Input Stage</span><div class="line"></div></div>
+
+<div id="s1" class="card card-rd">
+  <div class="cicon"><i class="fa-solid fa-inbox"></i></div>
+  <div class="cbody">
+    <div class="cnum">Step 01 · Source Input</div>
+    <div class="ctitle">Centralised Email Box &amp; File Path Intake</div>
+    <div class="cdesc">All source billing files are routed to a <strong>centralised email inbox</strong>. SPOC no longer monitors the inbox — Zai takes over from here. Files also arrive via a <strong>dedicated SAP file path</strong> for applicable clients.</div>
+    <div class="chips">
+      <div class="chip chip-rd"><i class="fa-solid fa-envelope"></i>Centralised Email Box</div>
+      <div class="chip chip-rd"><i class="fa-solid fa-folder-open"></i>Dedicated SAP File Path</div>
+      <div class="chip chip-rd"><i class="fa-solid fa-globe"></i>Client Portal Upload</div>
+    </div>
+    <div class="cnote cnote-blue"><i class="fa-solid fa-circle-info" style="margin-right:5px;color:var(--rd-accent)"></i><strong>Note:</strong> Some transactions and documents are processed via email; others are submitted directly via SAP file path, depending on the client configuration.</div>
+  </div>
+  <span class="owner-badge ob-rd"><i class="fa-solid fa-building" style="margin-right:4px"></i>Randstad</span>
+</div>
+
+<div class="connector"><div class="conn-line conn-line-mix"></div><div class="conn-arrow conn-arrow-mix"></div></div>
+<div class="handoff handoff-mix"><i class="fa-solid fa-robot" style="color:var(--zv-orange)"></i>Zai picks up from centralised inbox / file path</div>
+<div class="connector"><div class="conn-line conn-line-zv"></div><div class="conn-arrow conn-arrow-zv"></div></div>
+
+<!-- ─── STEP 2 ─ ZAI READS & EXTRACTS ──────────── -->
+<div class="section-divider sd-zv"><span><i class="fa-solid fa-robot" style="margin-right:6px"></i>Zai Intelligence Layer</span><div class="line"></div></div>
+
+<div id="s2" class="card card-zv">
+  <div class="cicon"><i class="fa-solid fa-file-waveform"></i></div>
+  <div class="cbody">
+    <div class="cnum">Step 02 · Zai · Data Extraction</div>
+    <div class="ctitle">Zai Reads Files &amp; Extracts Key Values</div>
+    <div class="cdesc">Zai reads the email and attachments (or ingests from the dedicated file path) and attempts to extract the following key identifiers from the source document:</div>
+    <div class="chips" style="margin-top:10px;">
+      <div class="chip chip-zv"><i class="fa-solid fa-id-badge"></i>Deputee ID</div>
+      <div class="chip chip-zv"><i class="fa-solid fa-building-user"></i>Client Name</div>
+      <div class="chip chip-zv"><i class="fa-solid fa-file-contract"></i>Contract Code</div>
+      <div class="chip chip-zv"><i class="fa-solid fa-hashtag"></i>Client Code</div>
+      <div class="chip chip-zv"><i class="fa-solid fa-key"></i>EW ID</div>
+      <div class="chip chip-zv"><i class="fa-solid fa-person"></i>Talent ID</div>
+    </div>
+    <div class="cnote cnote-zv"><i class="fa-solid fa-circle-info" style="margin-right:5px;color:var(--zv-orange)"></i>Any one or more of these key values may be present in the document. Zai scans the full content to identify whichever fields are available.</div>
+  </div>
+  <span class="owner-badge ob-zv"><i class="fa-solid fa-robot" style="margin-right:4px"></i>Zvolv · Zai</span>
+</div>
+
+<div class="connector"><div class="conn-line conn-line-zv"></div><div class="conn-arrow conn-arrow-zv"></div></div>
+
+<!-- ─── STEP 3 ─ CHECK: KEY VALUES ─────────────── -->
+<div id="s3" class="card card-ex">
+  <div class="cicon"><i class="fa-solid fa-circle-question"></i></div>
+  <div class="cbody">
+    <div class="cnum">Step 03 · Zai · Check — Key Value Identification</div>
+    <div class="ctitle">Can Zai Identify Key Values? → If No: Escalate to SPOC</div>
+    <div class="cdesc">If Zai cannot extract any of the required key values from the source file, the transaction is escalated immediately.</div>
+    <div class="cnote cnote-red"><i class="fa-solid fa-triangle-exclamation" style="margin-right:5px"></i><strong>Exception 1:</strong> If no key value data can be fetched from the source file, the transaction is pushed to the Invoice SPOC for manual handling. This is tracked and audited — volume of such cases and reasons are logged.</div>
+  </div>
+  <span class="owner-badge ob-zv"><i class="fa-solid fa-robot" style="margin-right:4px"></i>Zvolv · Zai</span>
+</div>
+
+<div class="connector"><div class="conn-line conn-line-zv"></div><div class="conn-arrow conn-arrow-zv"></div></div>
+
+<!-- ─── STEP 4 ─ RULE ENGINE LOOKUP ────────────── -->
+<div id="s4" class="card card-zv">
+  <div class="cicon"><i class="fa-solid fa-gears"></i></div>
+  <div class="cbody">
+    <div class="cnum">Step 04 · Zai · Client Rule Engine</div>
+    <div class="ctitle">Client Rule Engine Lookup — Identify Billing Process Type</div>
+    <div class="cdesc">Using the extracted key values, Zai queries the <strong>Client Master</strong> (maintained in Zvolv, synced from RD system) to identify the client and determine the applicable billing process type.</div>
+    <div class="cnote cnote-zv"><i class="fa-solid fa-database" style="margin-right:5px;color:var(--zv-orange)"></i>The Client Master holds each client's Billing Transaction Type, Active status, and Billing Cycle — Zvolv maintains this as the single source of truth for all client billing rules.</div>
+  </div>
+  <span class="owner-badge ob-zv"><i class="fa-solid fa-robot" style="margin-right:4px"></i>Zvolv · Zai</span>
+</div>
+
+<div class="connector"><div class="conn-line conn-line-zv"></div><div class="conn-arrow conn-arrow-zv"></div></div>
+
+<!-- ─── STEP 5 ─ CHECK: CLIENT IN MASTER ─────── -->
+<div id="s5" class="card card-ex">
+  <div class="cicon"><i class="fa-solid fa-magnifying-glass"></i></div>
+  <div class="cbody">
+    <div class="cnum">Step 05 · Zai · Check — Client Master Validation</div>
+    <div class="ctitle">Client Found in Master? Active? → If No / Inactive: Escalate</div>
+    <div class="cdesc">Two checks are performed against the Client Master before proceeding to template generation.</div>
+    <div class="cnote cnote-red" style="margin-top:8px"><i class="fa-solid fa-triangle-exclamation" style="margin-right:5px"></i><strong>Exception 2:</strong> If the client is not found in the Client Master, the transaction is routed to Invoice SPOC with the reason logged for audit.</div>
+    <div class="cnote cnote-warn" style="margin-top:6px"><i class="fa-solid fa-ban" style="margin-right:5px;color:var(--warning)"></i><strong>Exception 3:</strong> If the client is marked as <em>Inactive</em> in the Client Master and a file is received against that client, the SPOC is notified immediately with the client details and source file reference.</div>
+  </div>
+  <span class="owner-badge ob-zv"><i class="fa-solid fa-robot" style="margin-right:4px"></i>Zvolv · Zai</span>
+</div>
+
+<div class="connector"><div class="conn-line conn-line-zv"></div><div class="conn-arrow conn-arrow-zv"></div></div>
+
+<!-- ─── STEP 6 ─ TEMPLATE GENERATION ─────────── -->
+<div id="s6" class="card card-zv">
+  <div class="cicon"><i class="fa-solid fa-file-circle-plus"></i></div>
+  <div class="cbody">
+    <div class="cnum">Step 06 · Zai · Template Generation</div>
+    <div class="ctitle">Auto-Generate Invoice Draft Using Template Generation Rule</div>
+    <div class="cdesc">Once the billing type is confirmed, Zai looks up the <strong>Template Generation Rule Master</strong> (maintained in Zvolv) to retrieve the specific rule for that billing process type. A draft invoice file is created, with all available values populated by Zai.</div>
+    <div class="cnote cnote-zv"><i class="fa-solid fa-table-columns" style="margin-right:5px;color:var(--zv-orange)"></i>The Template Generation Rule Master holds: Transaction Type → Template Headers → Value Calculation Logic → Default Values → Manually-Editable Fields → File Template. This master drives all template creation — future changes are managed here with no major rework.</div>
+    <div class="cnote cnote-blue" style="margin-top:6px"><i class="fa-solid fa-circle-info" style="margin-right:5px;color:var(--rd-accent)"></i>The same standard template structure is used across all billing types — values are calculated and derived based on the specific transaction type being processed.</div>
+  </div>
+  <span class="owner-badge ob-zv"><i class="fa-solid fa-robot" style="margin-right:4px"></i>Zvolv · Zai</span>
+</div>
+
+<div class="connector"><div class="conn-line conn-line-mix"></div><div class="conn-arrow conn-arrow-mix"></div></div>
+<div class="handoff handoff-mix"><i class="fa-solid fa-arrow-right-arrow-left" style="color:var(--rd-mid)"></i>Zai assigns task → Invoice SPOC</div>
+<div class="connector"><div class="conn-line conn-line-rd"></div><div class="conn-arrow conn-arrow-rd"></div></div>
+
+<!-- ─── STEP 7 ─ SPOC REVIEW ──────────────────── -->
+<div class="section-divider sd-rd"><span><i class="fa-solid fa-user-tie" style="margin-right:6px"></i>Human Review Stage</span><div class="line"></div></div>
+
+<div id="s7" class="card card-rd">
+  <div class="cicon"><i class="fa-solid fa-user-pen"></i></div>
+  <div class="cbody">
+    <div class="cnum">Step 07 · SPOC · Review &amp; Edit</div>
+    <div class="ctitle">Invoice SPOC Reviews, Edits &amp; Re-uploads Draft</div>
+    <div class="cdesc">The Invoice SPOC receives the auto-generated draft via a task assignment. The SPOC reviews the file, makes any necessary modifications to the editable fields, and re-uploads the finalised draft back into Zvolv.</div>
+    <div class="cnote cnote-blue"><i class="fa-solid fa-circle-info" style="margin-right:5px;color:var(--rd-accent)"></i>Zai pre-fills all available fields per the Template Generation Rule. SPOC only needs to verify and fill in fields marked as manually-editable in the rule master — significantly reducing processing time.</div>
+  </div>
+  <span class="owner-badge ob-rd"><i class="fa-solid fa-user-tie" style="margin-right:4px"></i>Randstad SPOC</span>
+</div>
+
+<div class="connector"><div class="conn-line conn-line-rd"></div><div class="conn-arrow conn-arrow-rd"></div></div>
+
+<!-- ─── STEP 8 ─ MANAGER APPROVAL ────────────── -->
+<div id="s8" class="card card-rd">
+  <div class="cicon"><i class="fa-solid fa-user-shield"></i></div>
+  <div class="cbody">
+    <div class="cnum">Step 08 · Manager · Approval</div>
+    <div class="ctitle">Manager Review &amp; Approval</div>
+    <div class="cdesc">The SPOC-reviewed file is automatically routed to the <strong>Manager</strong> for final approval via Zvolv's workflow. Once approved, the file is queued for SAP submission via API.</div>
+    <div class="cnote cnote-blue"><i class="fa-solid fa-circle-info" style="margin-right:5px;color:var(--rd-accent)"></i>Rejected drafts are returned to the SPOC with comments via the Zvolv task system. Approval status is tracked in the audit trail.</div>
+  </div>
+  <span class="owner-badge ob-rd"><i class="fa-solid fa-building" style="margin-right:4px"></i>Randstad Manager</span>
+</div>
+
+<div class="connector"><div class="conn-line conn-line-mix"></div><div class="conn-arrow conn-arrow-mix"></div></div>
+<div class="handoff handoff-zv"><i class="fa-solid fa-plug-circle-check" style="color:var(--zv-orange)"></i>Zvolv triggers SAP API integration automatically</div>
+<div class="connector"><div class="conn-line conn-line-zv"></div><div class="conn-arrow conn-arrow-zv"></div></div>
+
+<!-- ─── STEP 9 ─ SAP API PUSH ─────────────────── -->
+<div class="section-divider sd-zv"><span><i class="fa-solid fa-plug" style="margin-right:6px"></i>System Integration</span><div class="line"></div></div>
+
+<div id="s9" class="sap-dark">
+  <div class="sap-dark-icon"><i class="fa-solid fa-server"></i></div>
+  <div class="sap-dark-body">
+    <div class="sap-dark-num">Step 09 · Zvolv · SAP API Integration</div>
+    <div class="sap-dark-title">Zvolv Pushes Approved File to SAP via API</div>
+    <div class="sap-dark-desc">Upon Manager approval, Zvolv automatically submits the processed invoice file to SAP through the configured <strong>API integration</strong> — no manual data entry required. SAP processes the transaction and returns the response.</div>
+    <div class="sap-tags">
+      <div class="sap-tag"><i class="fa-solid fa-bolt"></i>Automated API Push</div>
+      <div class="sap-tag"><i class="fa-solid fa-circle-check"></i>Zero Manual SAP Entry</div>
+      <div class="sap-tag"><i class="fa-solid fa-rotate"></i>Real-time Response Capture</div>
+    </div>
+  </div>
+</div>
+
+<div class="connector"><div class="conn-line conn-line-zv"></div><div class="conn-arrow conn-arrow-zv"></div></div>
+
+<!-- ─── STEP 10 ─ SO MASTER UPDATE ───────────── -->
+<div id="s10" class="card card-zv">
+  <div class="cicon"><i class="fa-solid fa-database"></i></div>
+  <div class="cbody">
+    <div class="cnum">Step 10 · Zvolv · Post-Processing</div>
+    <div class="ctitle">SAP Response Captured → Open SO Master Updated</div>
+    <div class="cdesc">Zvolv collects the SAP response and maps the <strong>SO Number</strong> and <strong>Invoice Number</strong> generated for each entry against the uploaded file. These values are written back to the <strong>Open SO Master</strong> automatically.</div>
+    <div class="chips">
+      <div class="chip chip-zv"><i class="fa-solid fa-hashtag"></i>SO Number → Open SO Master</div>
+      <div class="chip chip-zv"><i class="fa-solid fa-file-invoice"></i>Invoice Number → Open SO Master</div>
+    </div>
+    <div class="cnote cnote-warn" style="margin-top:8px"><i class="fa-solid fa-flag" style="margin-right:5px;color:var(--warning)"></i><strong>Zvolv Request:</strong> We request the Randstad team to add a new field — <strong>"Payroll Month"</strong> — to the Open SO Master to enable accurate reconciliation tracking.</div>
+  </div>
+  <span class="owner-badge ob-zv"><i class="fa-solid fa-robot" style="margin-right:4px"></i>Zvolv System</span>
+</div>
+
+<!-- ─── EXCEPTIONS ─────────────────────────────── -->
+<div class="section-divider sd-ex" style="margin-top:44px"><span><i class="fa-solid fa-triangle-exclamation" style="margin-right:6px"></i>Exception Handling</span><div class="line"></div></div>
+
+<div id="exc" class="exception-block">
+  <div class="exception-header">
+    <div class="exception-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <div>
+      <div class="exception-title">Exception Cases — Escalation &amp; Audit Framework</div>
+      <div class="exception-sub">All exceptions are auto-assigned to Invoice SPOC via Zvolv tasks and fully tracked for audit reporting.</div>
+    </div>
+  </div>
+  <div class="exception-grid">
+    <div class="ex-item">
+      <div class="ex-num">1</div>
+      <div class="ex-text"><strong>No Key Values Extractable</strong>If Zai cannot fetch any key value data from the source file, the transaction is pushed to Invoice SPOC and tracked with reason logging.</div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">2</div>
+      <div class="ex-text"><strong>Client Not in Master</strong>If the client details are not available in the Client Master, the transaction is handled manually by Invoice SPOC. Reason is captured and audited.</div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">3</div>
+      <div class="ex-text"><strong>Client Marked Inactive</strong>If a file is received for a client marked Inactive in the Client Master, the SPOC is notified immediately with full details.</div>
+    </div>
+  </div>
+  <div class="cnote cnote-red" style="margin-top:14px"><i class="fa-solid fa-chart-bar" style="margin-right:5px"></i><strong>Audit Dashboard:</strong> Zvolv tracks all exception assignments — number of billing transactions escalated to SPOC, exception type, frequency, and resolution status — available as a real-time audit report.</div>
+</div>
+
+<!-- ─── MASTERS ────────────────────────────────── -->
+<div class="section-divider sd-mas" style="margin-top:44px"><span><i class="fa-solid fa-database" style="margin-right:6px"></i>Masters &amp; Configuration</span><div class="line"></div></div>
+
+<div id="mas" class="masters-grid">
+
+  <div class="master-card" style="--mc-color:#1F3A8A;">
+    <div class="mc-icon"><i class="fa-solid fa-building-user"></i></div>
+    <div class="mc-title">Client Master</div>
+    <div class="mc-desc">Synced from RD system. Drives Zai's rule engine lookup for every billing transaction.</div>
+    <div class="mc-tags">
+      <span class="mc-tag">Billing Transaction Type</span>
+      <span class="mc-tag">Active / Inactive</span>
+      <span class="mc-tag">Billing Cycle</span>
+      <span class="mc-tag">RD Sync</span>
+    </div>
+  </div>
+
+  <div class="master-card" style="--mc-color:#00B86E;">
+    <div class="mc-icon"><i class="fa-solid fa-users"></i></div>
+    <div class="mc-title">Employee Master</div>
+    <div class="mc-desc">Synced from RD system. Used by Zai to validate employee details and fetch billable rates.</div>
+    <div class="mc-tags">
+      <span class="mc-tag">Employee Status</span>
+      <span class="mc-tag">Employee ID</span>
+      <span class="mc-tag">Role</span>
+      <span class="mc-tag">Weekly Rate</span>
+      <span class="mc-tag">Hourly Rate</span>
+      <span class="mc-tag">Daily Rate</span>
+      <span class="mc-tag">Monthly Rate</span>
+    </div>
+  </div>
+
+  <div class="master-card" style="--mc-color:#06CC9D;">
+    <div class="mc-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+    <div class="mc-title">Open SO Master</div>
+    <div class="mc-desc">Synced from SAP. Used by Zai to reconcile values against existing SO records. Updated post each SAP response.</div>
+    <div class="mc-tags">
+      <span class="mc-tag">SO Number</span>
+      <span class="mc-tag">Invoice Number</span>
+      <span class="mc-tag">SAP Sync</span>
+    </div>
+    <div class="mc-request"><i class="fa-solid fa-flag" style="color:var(--warning);margin-right:5px"></i><strong>Zvolv Request:</strong> Please add <strong>"Payroll Month"</strong> as a new field in Open SO Master.</div>
+  </div>
+
+  <div class="master-card" style="--mc-color:#00B4D8;">
+    <div class="mc-icon"><i class="fa-solid fa-file-circle-plus"></i></div>
+    <div class="mc-title">Non-Payroll Transaction Master</div>
+    <div class="mc-desc">New master for Advance Liability &amp; Retainer Invoice billing types — no SO number available for these, tracked separately.</div>
+    <div class="mc-tags">
+      <span class="mc-tag">Client Name</span>
+      <span class="mc-tag">Contract Code</span>
+      <span class="mc-tag">Processed Month</span>
+      <span class="mc-tag">Year</span>
+      <span class="mc-tag">Advance Amount</span>
+      <span class="mc-tag">Invoice Number</span>
+      <span class="mc-tag">Open SO Number</span>
+      <span class="mc-tag">Timestamp</span>
+    </div>
+  </div>
+
+  <div class="master-card" style="--mc-color:#8B5CF6; grid-column: 1 / -1;">
+    <div class="mc-icon"><i class="fa-solid fa-sliders"></i></div>
+    <div class="mc-title">Template Generation Rule Master</div>
+    <div class="mc-desc">The intelligence backbone for all template creation. Any future rule changes are made here — no rework to templates required. Drives Zai's auto-generation of invoice drafts for all 13 billing types.</div>
+    <div class="mc-tags">
+      <span class="mc-tag">Transaction Type</span>
+      <span class="mc-tag">Template Headers</span>
+      <span class="mc-tag">Value Calculation / Default</span>
+      <span class="mc-tag">Manually Editable Fields</span>
+      <span class="mc-tag">File Template (Upload)</span>
+    </div>
+    <div class="mc-request"><i class="fa-solid fa-flag" style="color:var(--warning);margin-right:5px"></i><strong>Zvolv Request:</strong> Please provide 13 RFID template definitions — specifying which fields Zai should populate (with logic) and which fields should be updated manually by the Invoice SPOC.</div>
+  </div>
+
+</div><!-- /masters-grid -->
+
+</div><!-- /flow -->
+</main>
+
+<footer>
+  <p>Randstad × Zvolv · Billing &amp; Finance Ops · To-Be Process Documentation · Confidential</p>
+  <span class="footer-badge">Future State · Internal Use Only</span>
+</footer>
+
+<!-- ═══ BACK TO TOP ════════════════════════════════ -->
+<button id="back-to-top" aria-label="Back to top" title="Back to top">
+  <svg class="ring" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21.3"/></svg>
+  <i class="fa-solid fa-chevron-up"></i>
+</button>
+
+<!-- ═══ SCRIPTS ═══════════════════════════════════ -->
+<script>
+(function(){
+  /* ── Legend scroll + highlight ── */
+  document.querySelectorAll('.leg[data-target]').forEach(function(item){
+    item.addEventListener('click', function(){
+      var el = document.getElementById(item.getAttribute('data-target'));
+      if(!el) return;
+      var top = el.getBoundingClientRect().top + window.pageYOffset - 90;
+      window.scrollTo({top: top, behavior:'smooth'});
+      setTimeout(function(){
+        var isDark = el.classList.contains('sap-dark');
+        var cls = isDark ? 'hl-dark' : el.classList.contains('card-zv') ? 'hl-zv' : 'hl-rd';
+        el.classList.remove('hl-rd','hl-zv','hl-dark');
+        void el.offsetWidth;
+        el.classList.add(cls);
+        el.addEventListener('animationend', function(){ el.classList.remove('hl-rd','hl-zv','hl-dark'); }, {once:true});
+      }, 520);
+    });
+  });
+
+  /* ── Back to top ── */
+  var btn  = document.getElementById('back-to-top');
+  var ring = btn.querySelector('circle');
+  var CIRC = 134;
+
+  window.addEventListener('scroll', function(){
+    var scrolled  = window.pageYOffset;
+    var docH      = document.documentElement.scrollHeight - window.innerHeight;
+    btn.classList.toggle('visible', scrolled > 300);
+    if(ring && docH > 0) ring.style.strokeDashoffset = CIRC - (scrolled/docH)*CIRC;
+  }, {passive:true});
+
+  btn.addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
+  btn.addEventListener('keydown', function(e){
+    if(e.key==='Enter'||e.key===' '){ e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); }
+  });
+})();
+</script>
+
+</body>
+</html>
