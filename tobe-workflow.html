@@ -543,25 +543,74 @@ footer p { font-size:.76rem; color:var(--text-light); }
 <div class="flow">
 
 <!-- ─── STEP 1 ─ SOURCE INPUT ─────────────────── -->
-<div class="section-divider sd-rd"><span><i class="fa-solid fa-arrow-right-to-bracket" style="margin-right:6px"></i>Input Stage</span><div class="line"></div></div>
+<div class="section-divider sd-rd"><span><i class="fa-solid fa-arrow-right-to-bracket" style="margin-right:6px"></i>Input Stage — Single Gateway</span><div class="line"></div></div>
 
 <div id="s1" class="card card-rd">
-  <div class="cicon"><i class="fa-solid fa-inbox"></i></div>
+  <div class="cicon"><i class="fa-solid fa-envelope-open-text"></i></div>
   <div class="cbody">
-    <div class="cnum">Step 01 · Source Input</div>
-    <div class="ctitle">Centralised Email Box &amp; File Path Intake</div>
-    <div class="cdesc">All source billing files are routed to a <strong>centralised email inbox</strong>. SPOC no longer monitors the inbox — Zai takes over from here. Files also arrive via a <strong>dedicated SAP file path</strong> for applicable clients.</div>
-    <div class="chips">
-      <div class="chip chip-rd"><i class="fa-solid fa-envelope"></i>Centralised Email Box</div>
-      <div class="chip chip-rd"><i class="fa-solid fa-folder-open"></i>Dedicated SAP File Path</div>
+    <div class="cnum">Step 01 · Source Input · Single Gateway</div>
+    <div class="ctitle">Centralised Email Box — Single Source of Input</div>
+    <div class="cdesc">All billing source files are routed through a <strong>single centralised email inbox</strong>. This is the <em>only</em> entry point for all transactions — ELM team, Business team, and Invoice SPOC (for client portal or SAP-originated files) all drop emails to this one address. Zai monitors and processes from here automatically.</div>
+
+    <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div style="background:#EEF2FF;border:1.5px solid rgba(31,58,138,.2);border-radius:10px;padding:9px 16px;display:flex;align-items:center;gap:9px;font-size:.82rem;font-weight:700;color:var(--rd-blue);">
+        <i class="fa-solid fa-envelope" style="color:var(--rd-accent)"></i> ELM Team
       </div>
-    <div class="cnote cnote-blue"><i class="fa-solid fa-circle-info" style="margin-right:5px;color:var(--rd-accent)"></i><strong>Note:</strong> Some transactions and documents are processed via email; others are submitted directly via SAP file path, depending on the client configuration.</div>
+      <div style="font-size:1.1rem;color:var(--text-light)">→</div>
+      <div style="background:#EEF2FF;border:1.5px solid rgba(31,58,138,.2);border-radius:10px;padding:9px 16px;display:flex;align-items:center;gap:9px;font-size:.82rem;font-weight:700;color:var(--rd-blue);">
+        <i class="fa-solid fa-briefcase" style="color:var(--rd-accent)"></i> Business Team
+      </div>
+      <div style="font-size:1.1rem;color:var(--text-light)">→</div>
+      <div style="background:#EEF2FF;border:1.5px solid rgba(31,58,138,.2);border-radius:10px;padding:9px 16px;display:flex;align-items:center;gap:9px;font-size:.82rem;font-weight:700;color:var(--rd-blue);">
+        <i class="fa-solid fa-user-tie" style="color:var(--rd-accent)"></i> Invoice SPOC
+      </div>
+      <div style="font-size:1.6rem;color:var(--rd-accent);font-weight:800">→</div>
+      <div style="background:linear-gradient(135deg,var(--rd-blue),var(--rd-mid));border-radius:12px;padding:11px 20px;display:flex;align-items:center;gap:10px;font-size:.88rem;font-weight:800;color:#fff;box-shadow:0 4px 14px rgba(31,58,138,.3);">
+        <i class="fa-solid fa-inbox"></i> Centralised Email Box
+      </div>
+    </div>
+
+    <div class="cnote cnote-blue" style="margin-top:12px"><i class="fa-solid fa-lightbulb" style="margin-right:5px;color:var(--rd-accent)"></i><strong>Proposed Approach:</strong> Instead of maintaining two separate input gateways (email + SAP file path), we recommend consolidating to a <strong>single gateway — the Centralised Email Box</strong>. For transactions currently sourced via SAP file path or client portal, the Invoice SPOC will simply forward or drop an email to the centralised inbox. This is a more proactive and controlled approach.</div>
+
+    <!-- ADVANTAGES BLOCK -->
+    <div style="margin-top:14px;background:linear-gradient(135deg,#F0F9FF,#EEF2FF);border:1.5px solid rgba(31,58,138,.12);border-radius:12px;padding:16px 18px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--rd-mid);margin-bottom:12px;display:flex;align-items:center;gap:7px;">
+        <i class="fa-solid fa-star" style="color:var(--zv-orange)"></i> Advantages of Single Gateway
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:9px;">
+        <div style="background:#fff;border-radius:9px;padding:10px 13px;border:1px solid rgba(31,58,138,.1);display:flex;gap:9px;align-items:flex-start;">
+          <i class="fa-solid fa-check-circle" style="color:var(--zv-orange);margin-top:2px;flex-shrink:0"></i>
+          <span style="font-size:.79rem;color:var(--text-mid);line-height:1.55"><strong style="color:var(--text-dark);display:block">Single Point of Truth</strong>All billing inputs flow through one channel — no missed files across multiple paths.</span>
+        </div>
+        <div style="background:#fff;border-radius:9px;padding:10px 13px;border:1px solid rgba(31,58,138,.1);display:flex;gap:9px;align-items:flex-start;">
+          <i class="fa-solid fa-check-circle" style="color:var(--zv-orange);margin-top:2px;flex-shrink:0"></i>
+          <span style="font-size:.79rem;color:var(--text-mid);line-height:1.55"><strong style="color:var(--text-dark);display:block">Simpler Automation</strong>Zai monitors only one inbox — reduces configuration complexity and failure points.</span>
+        </div>
+        <div style="background:#fff;border-radius:9px;padding:10px 13px;border:1px solid rgba(31,58,138,.1);display:flex;gap:9px;align-items:flex-start;">
+          <i class="fa-solid fa-check-circle" style="color:var(--zv-orange);margin-top:2px;flex-shrink:0"></i>
+          <span style="font-size:.79rem;color:var(--text-mid);line-height:1.55"><strong style="color:var(--text-dark);display:block">Full Audit Trail</strong>Every transaction has an email record — date, sender, and attachment are captured and traceable.</span>
+        </div>
+        <div style="background:#fff;border-radius:9px;padding:10px 13px;border:1px solid rgba(31,58,138,.1);display:flex;gap:9px;align-items:flex-start;">
+          <i class="fa-solid fa-check-circle" style="color:var(--zv-orange);margin-top:2px;flex-shrink:0"></i>
+          <span style="font-size:.79rem;color:var(--text-mid);line-height:1.55"><strong style="color:var(--text-dark);display:block">Proactive SPOC Role</strong>SPOC becomes a trigger point rather than a processor — forwarding files is faster than manual uploads.</span>
+        </div>
+        <div style="background:#fff;border-radius:9px;padding:10px 13px;border:1px solid rgba(31,58,138,.1);display:flex;gap:9px;align-items:flex-start;">
+          <i class="fa-solid fa-check-circle" style="color:var(--zv-orange);margin-top:2px;flex-shrink:0"></i>
+          <span style="font-size:.79rem;color:var(--text-mid);line-height:1.55"><strong style="color:var(--text-dark);display:block">Faster Processing</strong>Eliminates polling delays from SAP file paths — email triggers Zai immediately on arrival.</span>
+        </div>
+        <div style="background:#fff;border-radius:9px;padding:10px 13px;border:1px solid rgba(31,58,138,.1);display:flex;gap:9px;align-items:flex-start;">
+          <i class="fa-solid fa-check-circle" style="color:var(--zv-orange);margin-top:2px;flex-shrink:0"></i>
+          <span style="font-size:.79rem;color:var(--text-mid);line-height:1.55"><strong style="color:var(--text-dark);display:block">Scalable &amp; Future-Proof</strong>New clients or billing types can be onboarded without changing the intake infrastructure.</span>
+        </div>
+      </div>
+    </div>
+
   </div>
   <span class="owner-badge ob-rd"><i class="fa-solid fa-building" style="margin-right:4px"></i>Randstad</span>
 </div>
 
 <div class="connector"><div class="conn-line conn-line-mix"></div><div class="conn-arrow conn-arrow-mix"></div></div>
-<div class="handoff handoff-mix"><i class="fa-solid fa-robot" style="color:var(--zv-orange)"></i>Zai picks up from centralised inbox / file path</div>
+<div class="handoff handoff-mix"><i class="fa-solid fa-robot" style="color:var(--zv-orange)"></i>Zai monitors &amp; picks up from centralised inbox</div>
 <div class="connector"><div class="conn-line conn-line-zv"></div><div class="conn-arrow conn-arrow-zv"></div></div>
 
 <!-- ─── STEP 2 ─ ZAI READS & EXTRACTS ──────────── -->
@@ -572,7 +621,7 @@ footer p { font-size:.76rem; color:var(--text-light); }
   <div class="cbody">
     <div class="cnum">Step 02 · Zai · Data Extraction</div>
     <div class="ctitle">Zai Reads Files &amp; Extracts Key Values</div>
-    <div class="cdesc">Zai reads the email and attachments (or ingests from the dedicated file path) and attempts to extract the following key identifiers from the source document:</div>
+    <div class="cdesc">Zai reads the incoming email and its attachments from the centralised inbox and attempts to extract the following key identifiers from the source document:</div>
     <div class="chips" style="margin-top:10px;">
       <div class="chip chip-zv"><i class="fa-solid fa-id-badge"></i>Deputee ID</div>
       <div class="chip chip-zv"><i class="fa-solid fa-building-user"></i>Client Name</div>
@@ -710,7 +759,7 @@ footer p { font-size:.76rem; color:var(--text-light); }
       <div class="chip chip-zv"><i class="fa-solid fa-hashtag"></i>SO Number → Open SO Master</div>
       <div class="chip chip-zv"><i class="fa-solid fa-file-invoice"></i>Invoice Number → Open SO Master</div>
     </div>
-    <div class="cnote cnote-warn" style="margin-top:8px"><i class="fa-solid fa-flag" style="margin-right:5px;color:var(--warning)"></i><strong>Zvolv Request:</strong> We request the Randstad team to add a new field — <strong>"Payroll Month"</strong> — to the Open SO Master to enable accurate reconciliation tracking.</div>
+    <div class="cnote cnote-warn" style="margin-top:8px"><i class="fa-solid fa-flag" style="margin-right:5px;color:var(--warning)"></i><strong>Randstad Request:</strong> We request the Randstad team to add a new field — <strong>"Payroll Month"</strong> — to the Open SO Master to enable accurate reconciliation tracking.</div>
   </div>
   <span class="owner-badge ob-zv"><i class="fa-solid fa-robot" style="margin-right:4px"></i>Zvolv System</span>
 </div>
@@ -720,7 +769,7 @@ footer p { font-size:.76rem; color:var(--text-light); }
 
 <div id="exc" class="exception-block">
   <div class="exception-header">
-    <div class="exception-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <div class="exception-icon"><i class="fa-solid fa-shield-exclamation"></i></div>
     <div>
       <div class="exception-title">Exception Cases — Escalation &amp; Audit Framework</div>
       <div class="exception-sub">All exceptions are auto-assigned to Invoice SPOC via Zvolv tasks and fully tracked for audit reporting.</div>
@@ -784,7 +833,7 @@ footer p { font-size:.76rem; color:var(--text-light); }
       <span class="mc-tag">Invoice Number</span>
       <span class="mc-tag">SAP Sync</span>
     </div>
-    <div class="mc-request"><i class="fa-solid fa-flag" style="color:var(--warning);margin-right:5px"></i><strong>Zvolv Request:</strong> Please add <strong>"Payroll Month"</strong> as a new field in Open SO Master.</div>
+    <div class="mc-request"><i class="fa-solid fa-flag" style="color:var(--warning);margin-right:5px"></i><strong>Randstad Request:</strong> Please add <strong>"Payroll Month"</strong> as a new field in Open SO Master.</div>
   </div>
 
   <div class="master-card" style="--mc-color:#00B4D8;">
@@ -814,7 +863,7 @@ footer p { font-size:.76rem; color:var(--text-light); }
       <span class="mc-tag">Manually Editable Fields</span>
       <span class="mc-tag">File Template (Upload)</span>
     </div>
-    <div class="mc-request"><i class="fa-solid fa-flag" style="color:var(--warning);margin-right:5px"></i><strong>Zvolv Request:</strong> Please provide 13 RFID template definitions — specifying which fields Zai should populate (with logic) and which fields should be updated manually by the Invoice SPOC.</div>
+    <div class="mc-request"><i class="fa-solid fa-flag" style="color:var(--warning);margin-right:5px"></i><strong>Randstad Request:</strong> Please provide 13 RFID template definitions — specifying which fields Zai should populate (with logic) and which fields should be updated manually by the Invoice SPOC.</div>
   </div>
 
 </div><!-- /masters-grid -->
