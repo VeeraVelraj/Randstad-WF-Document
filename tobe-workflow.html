@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -530,6 +532,7 @@ footer p { font-size:.76rem; color:var(--text-light); }
   <div class="leg zv-leg"  data-target="s2"  title="Zai Processing"><span class="leg-dot" style="background:#06CC9D"></span>Zai Processing</div>
   <div class="leg zv-leg"  data-target="s4"  title="Rule Engine"><span class="leg-dot" style="background:#06CC9D"></span>Rule Engine</div>
   <div class="leg zv-leg"  data-target="s6"  title="Template Generation"><span class="leg-dot" style="background:#00B4D8"></span>Template Generation</div>
+  <div class="leg zv-leg"  data-target="s65" title="Paybill Integration"><span class="leg-dot" style="background:#FFC107"></span>Paybill Integration</div>
   <div class="leg rd-leg"  data-target="s7"  title="SPOC Review"><span class="leg-dot" style="background:#1F3A8A"></span>SPOC Review</div>
   <div class="leg rd-leg"  data-target="s8"  title="Manager Approval"><span class="leg-dot" style="background:#2B52C8"></span>Manager Approval</div>
   <div class="leg zv-leg"  data-target="s9"  title="SAP API Push"><span class="leg-dot" style="background:#06CC9D"></span>SAP API Push</div>
@@ -683,6 +686,53 @@ footer p { font-size:.76rem; color:var(--text-light); }
     <div class="cdesc">Once the billing type is confirmed, Zai looks up the <strong>Template Generation Rule Master</strong> (maintained in Zvolv) to retrieve the specific rule for that billing process type. A draft invoice file is created, with all available values populated by Zai.</div>
     <div class="cnote cnote-zv"><i class="fa-solid fa-table-columns" style="margin-right:5px;color:var(--zv-orange)"></i>The Template Generation Rule Master holds: Transaction Type → Template Headers → Value Calculation Logic → Default Values → Manually-Editable Fields → File Template. This master drives all template creation — future changes are managed here with no major rework.</div>
     <div class="cnote cnote-blue" style="margin-top:6px"><i class="fa-solid fa-circle-info" style="margin-right:5px;color:var(--rd-accent)"></i>The same standard template structure is used across all billing types — values are calculated and derived based on the specific transaction type being processed.</div>
+    <div class="cnote cnote-warn" style="margin-top:6px;"><i class="fa-solid fa-plug" style="margin-right:5px;color:var(--warning)"></i><strong>Note:</strong> Template population is completed only after the mandatory <strong>Paybill Integration step (Step 06B)</strong> — Zvolv downloads the Paybill file using the Invoice ID from the Billing Sheet before generating both output files.</div>
+  </div>
+  <span class="owner-badge ob-zv"><i class="fa-solid fa-robot" style="margin-right:4px"></i>Zvolv · Zai</span>
+</div>
+
+<div class="connector"><div class="conn-line conn-line-zv"></div><div class="conn-arrow conn-arrow-zv"></div></div>
+
+<!-- ─── STEP 6.5 ─ PAYBILL INTEGRATION ──────── -->
+<div class="section-divider sd-zv"><span><i class="fa-solid fa-plug" style="margin-right:6px"></i>Paybill Integration — Pre-Template Step</span><div class="line"></div></div>
+
+<div id="s65" class="card card-zv" style="--stripe:#FFC107; border-left-color:#FFC107;">
+  <div class="cicon" style="background:#FFF8E6; color:#B8860B;"><i class="fa-solid fa-arrow-right-arrow-left"></i></div>
+  <div class="cbody">
+    <div class="cnum" style="color:#B8860B;">Step 06B · Zai · Paybill Integration</div>
+    <div class="ctitle">Zvolv Integrates with Paybill — Download File via Invoice ID</div>
+    <div class="cdesc">Before template generation can be completed, Zvolv performs a mandatory integration with Paybill. Using the <strong>Invoice ID extracted from the Billing Sheet</strong> as the search key, Zvolv queries Paybill, retrieves the matching record, and downloads the corresponding Paybill file. The downloaded data is then used to accurately populate both output files — the Working Draft Sheet and the SAP Upload File.</div>
+    <div class="cnote" style="background:#FFF8E6; border-left:3px solid #FFC107; color:#6B4F00; margin-top:10px; border-radius:0 8px 8px 0; padding:7px 12px; font-size:.79rem; line-height:1.55;">
+      <i class="fa-solid fa-triangle-exclamation" style="margin-right:5px; color:#FFC107;"></i>
+      <strong>Mandatory Integration:</strong> This Paybill integration step is a prerequisite for all billing process types that involve a Paybill file download. Template generation cannot be completed until the Paybill file is successfully retrieved.
+    </div>
+    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+      <div style="background:#FFF8E6; border:1.5px solid rgba(184,134,11,.25); border-radius:10px; padding:9px 16px; display:flex; align-items:center; gap:9px; font-size:.82rem; font-weight:700; color:#6B4F00;">
+        <i class="fa-solid fa-file-invoice" style="color:#FFC107;"></i> Invoice ID (from Billing Sheet)
+      </div>
+      <div style="font-size:1.3rem; color:#B8860B; align-self:center;">→</div>
+      <div style="background:#FFF8E6; border:1.5px solid rgba(184,134,11,.25); border-radius:10px; padding:9px 16px; display:flex; align-items:center; gap:9px; font-size:.82rem; font-weight:700; color:#6B4F00;">
+        <i class="fa-solid fa-magnifying-glass" style="color:#FFC107;"></i> Search in Paybill
+      </div>
+      <div style="font-size:1.3rem; color:#B8860B; align-self:center;">→</div>
+      <div style="background:#FFF8E6; border:1.5px solid rgba(184,134,11,.25); border-radius:10px; padding:9px 16px; display:flex; align-items:center; gap:9px; font-size:.82rem; font-weight:700; color:#6B4F00;">
+        <i class="fa-solid fa-download" style="color:#FFC107;"></i> Download Paybill File
+      </div>
+      <div style="font-size:1.3rem; color:#B8860B; align-self:center;">→</div>
+      <div style="background:linear-gradient(135deg,#FFF8E6,#E8FBF6); border:1.5px solid rgba(6,204,157,.25); border-radius:10px; padding:9px 16px; display:flex; align-items:center; gap:9px; font-size:.82rem; font-weight:800; color:#024D3C;">
+        <i class="fa-solid fa-file-circle-plus" style="color:var(--zv-orange);"></i> Populate Both Output Files
+      </div>
+    </div>
+    <div style="margin-top:12px; display:grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap:9px;">
+      <div style="background:#fff; border-radius:9px; padding:10px 13px; border:1px solid rgba(184,134,11,.18); display:flex; gap:9px; align-items:flex-start;">
+        <i class="fa-solid fa-file-pen" style="color:var(--zv-orange); margin-top:2px; flex-shrink:0;"></i>
+        <span style="font-size:.79rem; color:var(--text-mid); line-height:1.55;"><strong style="color:var(--text-dark); display:block;">Working Draft Sheet</strong>Populated using Paybill data for SPOC review and editing.</span>
+      </div>
+      <div style="background:#fff; border-radius:9px; padding:10px 13px; border:1px solid rgba(184,134,11,.18); display:flex; gap:9px; align-items:flex-start;">
+        <i class="fa-solid fa-server" style="color:var(--rd-blue); margin-top:2px; flex-shrink:0;"></i>
+        <span style="font-size:.79rem; color:var(--text-mid); line-height:1.55;"><strong style="color:var(--text-dark); display:block;">SAP Upload File</strong>Paybill-driven data used to generate the final SAP-ready file.</span>
+      </div>
+    </div>
   </div>
   <span class="owner-badge ob-zv"><i class="fa-solid fa-robot" style="margin-right:4px"></i>Zvolv · Zai</span>
 </div>
